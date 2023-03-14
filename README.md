@@ -17,3 +17,28 @@
 1. 請使用Golang實作一個收銀系統（請考慮Clean Code及Design Pattern）。
 
 2. 承上題，平台後來新增了另一個收費模式，如果有VIP身份扣100點以上折抵，另外享再九折優惠。（考慮SOLID）
+
+## How to use
+```go
+system := &cashier.ChargingSystem{
+    ChargingMap: make(map[string]cashier.ChargingMode),
+}
+goodPrice := float64(1000)
+pointLimit := float64(100)
+vipDiscountRate := 0.95
+pointDiscountRate := float64(2)
+system.AddChargingMode("Normal", &cashier.NormalCharging{})
+system.AddChargingMode("Vip", &cashier.VipCharging{Discount: vipDiscountRate})
+system.AddChargingMode("Point", &cashier.PointCharging{Rate: pointDiscountRate})
+
+price := system.Calculate("Normal", goodPrice)
+pointDiscount := system.GetChargingMode("Point").Calculate(pointLimit)
+fmt.Printf("商品金額: %.2f 元, 一般會員購買商品價格: %.2f 可使用最多 %.2f 點數折抵 %.2f 元  \n", goodPrice, price, pointDiscount, pointLimit)
+price = system.Calculate("Vip", goodPrice)
+fmt.Printf("商品金額: %.2f 元 VIP折數: %.2f VIP會員購買商品價格: %.2f 可使用最多 %.2f 點數折抵 %.2f 元  \n", goodPrice, vipDiscountRate, price, pointDiscount, pointLimit)
+```
+output
+```go
+商品金額: 1000.00 元, 一般會員購買商品價格: 1000.00 可使用最多 200.00 點數折抵 100.00 元  
+商品金額: 1000.00 元 VIP折數: 0.95 VIP會員購買商品價格: 950.00 可使用最多 200.00 點數折抵 100.00 元
+```
